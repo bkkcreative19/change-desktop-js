@@ -47,10 +47,13 @@
           formData.append(myFiles.item(key).name, myFiles.item(key));
         });
 
-        const response = await fetch("http://localhost:5000/upload", {
-          method: "POST",
-          body: formData,
-        });
+        const response = await fetch(
+          "https://change-background.onrender.com/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
         const json = await response.json();
 
