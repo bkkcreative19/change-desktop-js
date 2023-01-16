@@ -4,6 +4,7 @@ import cors from "cors";
 import { BlockBlobClient, BlobServiceClient } from "@azure/storage-blob";
 import getStream from "into-stream";
 import dotenv from "dotenv";
+import { EventHubProducerClient } from "@azure/event-hubs";
 import path from "path";
 
 import filesPayloadExists from "./middleware/filesPayloadExits.js";
@@ -33,9 +34,24 @@ app.post(
   filesPayloadExists,
   fileExtLimiter([".png", ".jpg", ".jpeg"]),
   fileSizeLimiter,
-  (req, res) => {
+  async (req, res) => {
     const files = req.files;
     // console.log(files);
+    const eventHubName = "yayyyyyyyyy";
+    const producer = new EventHubProducerClient(
+      "Endpoint=sb://testing-kris.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=VQarsMlpLhMEVu24PyMQzGZJgIlijkE7NXsU33cDab4=",
+      eventHubName
+    );
+
+    const batch = await producer.createBatch();
+    batch.tryAdd({ body: "First event" });
+
+    await producer.sendBatch(batch);
+
+    // Close the producer client.
+    await producer.close();
+
+    console.log("A batch of three events have been sent to the event hub");
 
     const getBlobName = (originalName) => {
       const identifier = Math.random().toString().replace(/0\./, ""); // remove "0." from start of string
